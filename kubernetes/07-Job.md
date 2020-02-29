@@ -6,6 +6,7 @@
 
 - [Job](#Job)
 - [Job示例](#Job示例)
+- [Job原理](#Job原理)
 - [CronJob](#CronJob)
 
 
@@ -72,6 +73,10 @@ pi     0/1           86s        86s
 ➜  kubernetes git:(master) ✗ kubectl get pods
 NAME                                READY   STATUS              RESTARTS   AGE
 pi-cx568                            0/1     ContainerCreating   0          8m7s
+
+# 删除
+➜  kubernetes git:(master) ✗ kubectl delete job pi
+job.batch "pi" deleted
 ```
 
 [↑top](#目录)

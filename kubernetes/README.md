@@ -12,3 +12,4 @@ Kubernetes
 - [应用编排与管理](./05-labels-anotations-owereference.md)
 - [应用编排与管理之 Deployment & Replicaset](./06-deployment.md)
 - [应用编排与管理之 Job & CronJob](./07-job.md)
+- [应用编排与管理之 DaemonSet](./07-daemonset.md)

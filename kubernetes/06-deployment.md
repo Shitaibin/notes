@@ -178,3 +178,20 @@ nginx-deployment-54f57cf6bf-xvxpf   1/1     Running   0          22s
 ```
 
 [↑top](#Deployment)
+
+### 删除Deployment
+
+```sh
+➜  kubernetes git:(master) ✗ kubectl delete deployment nginx-deployment
+deployment.apps "nginx-deployment" deleted
+➜  kubernetes git:(master) ✗
+➜  kubernetes git:(master) ✗ kubectl get pod
+NAME                                READY   STATUS              RESTARTS   AGE
+nginx-deployment-54f57cf6bf-7bxqv   0/1     Terminating         0          8h
+nginx-deployment-54f57cf6bf-7qks8   0/1     Terminating         0          8h
+nginx-deployment-54f57cf6bf-kkk8b   0/1     Terminating         0          8h
+nginx-deployment-54f57cf6bf-l6r6j   0/1     Terminating         0          8h
+nginx-deployment-54f57cf6bf-xvxpf   0/1     Terminating         0          8h
+```
+
+[↑top](#Deployment)

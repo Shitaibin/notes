@@ -1,6 +1,8 @@
-Deployment
-====
+[*k8s目录*](https://github.com/Shitaibin/notes/tree/master/kubernetes#%E7%9B%AE%E5%BD%95)
 
+----
+
+## Deployment
 
 Deloyment用来管理“部署”：创建、更新、回滚、删除部署。
 
@@ -10,7 +12,7 @@ Deloyment用来管理“部署”：创建、更新、回滚、删除部署。
 - [更新Deloyment](#更新Deloyment)
 - [回滚Deloyment](#回滚Deloyment)
 
-## Delpyment和Replicaset
+### Delpyment和Replicaset
 
 但Deloyment并不直接管理Pod，Deloyment管理的是Replicaset，Replicaset管理Pod，所以形成的OwnerReference如下：
 
@@ -39,7 +41,7 @@ nginx-deployment-54f57cf6bf   5         5         5       18m
 ```
 [↑top](#Deployment)
 
-## Replicaset和Pod
+### Replicaset和Pod
 
 前面提到Pod是属于Replicaset的，而不是Deployment，解析一下Pod的名字:
 
@@ -63,7 +65,7 @@ nginx-deployment-54f57cf6bf-wvfxl   1/1     Running   0          18m
 ```
 [↑top](#Deployment)
 
-## Deloyment文件示例
+### Deloyment文件示例
 
 ```yaml
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
@@ -97,7 +99,7 @@ spec:
 
 [↑top](#Deployment)
 
-## 更新Deloyment
+### 更新Deloyment
 
 Deloyment每次修改都会生成1个Replicaset，每个Replicaset都可以看做一个Deloyment部署实例版本，版本可以向后发展，也可以向前回滚。
 
@@ -140,7 +142,7 @@ nginx-deployment-56f8998dbc-pr2wj   1/1     Running   0          21m
 
 [↑top](#Deployment)
 
-## 回滚Deloyment
+### 回滚Deloyment
 
 Deloyment下有多个Replicaset时，可以回滚到之前的某个Replicaset，回滚之后Replicaset会创建新的Pod，而不是使用之前该Replicaset拥有的Pod，因为那些Pod已经被删除。
 

@@ -23,6 +23,7 @@ Pod是k8s的资源和调度单位。
 具有超亲密关系的容器，应当放到一个Pod里面，不仅更容易实现上层应用的功能，更实现更高的效率。
 
 ![](http://img.lessisbetter.site/k8s-pod-concept.png)
+*图片来自阿里云原生公开课第4讲*
 
 
 [↑top](#目录)
@@ -37,6 +38,7 @@ Pod是k8s的资源和调度单位。
 - Pod的声明周期与基础容器相同，要比Pod内容器长。
 
 ![](http://img.lessisbetter.site/k8s-pod-net.png)
+*图片来自阿里云原生公开课第4讲*
 
 共享存储：Node上目录挂在到Pod内每个容器上。
 
@@ -57,6 +59,7 @@ Pod是k8s的资源和调度单位。
 
 ![](http://img.lessisbetter.site/k8s-pod-adapter.png)
 
+> 本节内容图片来自论文 [Design patterns for container-based distributed systems](https://www.usenix.org/system/files/conference/hotcloud16/hotcloud16_burns.pdf) 。
 
 [↑top](#目录)
 

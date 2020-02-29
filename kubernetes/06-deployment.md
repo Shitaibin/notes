@@ -2,7 +2,7 @@
 
 ----
 
-## Deployment
+## Deployment & Replicaset
 
 Deloyment用来管理“部署”：创建、更新、回滚、删除部署。
 
@@ -22,6 +22,8 @@ Deloyment用来管理“部署”：创建、更新、回滚、删除部署。
 所以Deloyment创建、更新、回滚的是Replicaset。
 
 Deloyment和Replicaset是2个组件，Deloyment并不直接操控Replicaset，而是通过API Server。
+
+Deployment 和 Replicaset 分别有各自的Controller。
 
 ![](http://img.lessisbetter.site/k8s-deloyment-arch.png)
 *图片来自阿里云原生公开课第6讲*

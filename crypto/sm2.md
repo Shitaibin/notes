@@ -1,4 +1,4 @@
-[*crypto目录*]()
+[*crypto目录*](https://github.com/Shitaibin/notes/tree/master/crypto)
 ------
 
 使用[`gmsm`](https://github.com/tjfoc/gmsm/)进行一些国密和标准加密的对比。

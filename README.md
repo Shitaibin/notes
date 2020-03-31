@@ -4,3 +4,4 @@
 
 ## 分类
 - [Kubernetes](https://github.com/Shitaibin/notes/tree/master/kubernetes)
+- [Crypto](https://github.com/Shitaibin/notes/tree/master/crypto)

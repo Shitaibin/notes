@@ -18,3 +18,4 @@ Kubernetes
 - [应用编排与管理之 Job & CronJob](./07-job.md)
 - [应用编排与管理之 DaemonSet](./07-daemonset.md)
 - [应用配置管理之 InitContainer](./08-init-container.md)
+- [应用配置管理之 Service](./14-service.md)

@@ -6,11 +6,14 @@
 
 Deloyment用来管理“部署”：创建、更新、回滚、删除部署。
 
-- [Delpyment和Replicaset](#Delpyment和Replicaset)
-- [Replicaset和Pod](#Replicaset和Pod)
-- [Deloyment文件示例](#Deloyment文件示例)
-- [更新Deloyment](#更新Deloyment)
-- [回滚Deloyment](#回滚Deloyment)
+- [Deployment & Replicaset](#Deployment--Replicaset)
+  - [Delpyment和Replicaset](#Delpyment%E5%92%8CReplicaset)
+  - [Replicaset和Pod](#Replicaset%E5%92%8CPod)
+  - [Deloyment文件示例](#Deloyment%E6%96%87%E4%BB%B6%E7%A4%BA%E4%BE%8B)
+  - [更新Deloyment](#%E6%9B%B4%E6%96%B0Deloyment)
+  - [回滚Deloyment](#%E5%9B%9E%E6%BB%9ADeloyment)
+  - [删除Deployment](#%E5%88%A0%E9%99%A4Deployment)
+
 
 ### Delpyment和Replicaset
 

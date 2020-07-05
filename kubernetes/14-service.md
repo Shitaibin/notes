@@ -9,7 +9,7 @@
   - [ClusterIP：对集群内提供访问](#ClusterIP%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%86%85%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
   - [NodePort：对集群外提供访问](#NodePort%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%A4%96%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
   - [LoadBalencer：对集群外提供访问](#LoadBalencer%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%A4%96%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
-  - [InGress：对集群外提供访问](#InGress%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%A4%96%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
+  - [Ingress：对集群外提供访问](#Ingress%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%A4%96%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
   - [Service架构](#Service%E6%9E%B6%E6%9E%84)
   - [Port & NodePort & TargetPort](#Port--NodePort--TargetPort)
 
@@ -60,7 +60,7 @@ Service所拥有的IP是虚拟IP，也称VIP。
 
 [↑top](#目录)
 
-### InGress：对集群外提供访问
+### Ingress：对集群外提供访问
 
 每个服务都需要自己的LoadBanlencer，当服务很多时，就需要创建很多LoadBalencer，有没有更好的方式解决这个问题？
 

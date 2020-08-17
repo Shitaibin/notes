@@ -6,6 +6,7 @@
 ## 目录
 
 - [目录](#目录)
+- [path带参数](#path带参数)
 - [url带入参数](#url带入参数)
 	- [方法一](#方法一)
 	- [方法二](#方法二)
@@ -13,6 +14,25 @@
 	- [方法一](#方法一-1)
 	- [方法二](#方法二-1)
 
+## path带参数
+
+样例url：
+
+```
+http://localhost/bank/001/account/001
+```
+
+路由设置为：
+
+```
+@router /bank/:bankId/account/:accountId
+```
+
+```go
+// 注意需要参数是用`:`标记的，是参数的一部分，不能省略
+c.GetString(":bankId")
+c.GetString(":accountId")
+```
 
 ## url带入参数
 
@@ -47,9 +67,9 @@ type UserRequest struct {
 }
 
 var u UserRequest
-err := r.ParseForm(&u)
+err := controller.ParseForm(&u)
 if err != nil {
-    r.Ctx.WriteString("read user and password, get error: " + err.Error())
+    controller.Ctx.WriteString("read user and password, get error: " + err.Error())
     return
 }
 ```

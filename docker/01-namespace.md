@@ -2,7 +2,7 @@
 
 
 - [Namespace](#namespace)
-  - [实践](#实践)
+	- [实践](#实践)
   
 ## Namespace
 
@@ -45,9 +45,9 @@ func main() {
 }
 ```
 
-`pstree -pl` ： 列出当前的进程调用树。
-`readlink /proc/PID/ns/uts` : 可以查看某个进程的uts
-`ipcs -q` ： 可以查看系统当前的消息队列
-`ipcmk -Q` ： 可以创建消息
-`mount -t proc proc /proc` : 用于挂载进程空间
-`id` : 命令用来查看当前系统的用户信息
+- `pstree -pl` ： 列出当前的进程调用树。
+- `readlink /proc/PID/ns/uts` : 可以查看某个进程的uts
+- `ipcs -q` ： 可以查看系统当前的消息队列
+- `ipcmk -Q` ： 可以创建消息
+- `mount -t proc proc /proc` : 用于挂载进程空间 , 退出也执行相同命令
+- `id` : 命令用来查看当前系统的用户信息

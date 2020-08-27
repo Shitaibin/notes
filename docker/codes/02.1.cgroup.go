@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -14,40 +13,43 @@ import (
 const CgroupMemoryHierarchyMount = "/sys/fs/cgroup/memory"
 
 func main() {
-	// if os.Args[0] == "/proc/self/exe" {
-	{
-		fmt.Printf("Current pid: %d", syscall.Getpid())
+	if os.Args[0] == "/proc/self/exe" {
+		fmt.Println("---------- 2 ------------")
+		fmt.Printf("Current pid: %d\n", syscall.Getpid())
 
-		// 施加内存压力，200MB
-		cmd := exec.Command("sh", "-c", "stress --vm-bytes 200m --vm-keep -m 1")
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			// Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWNS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID | syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET,
-		}
+		// 创建stress子进程，施加内存压力
+		allocMemSize := "101m" // 另外1项测试为99m
+		fmt.Printf("allocMemSize: %v\n", allocMemSize)
+		stressCmd := fmt.Sprintf("stress --vm-bytes %s --vm-keep -m 1", allocMemSize)
+		cmd := exec.Command("sh", "-c", stressCmd)
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
 		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
+			fmt.Printf("stress run error: %v", err)
 			os.Exit(-1)
 		}
 	}
 
-	cmd := exec.Command("/bin/bash")
+	fmt.Println("---------- 1 ------------")
+	cmd := exec.Command("/proc/self/exe")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWNS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID | syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET,
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWNS | syscall.CLONE_NEWPID,
 	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	// 启动子进程
 	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
+		fmt.Printf("/proc/self/exe start error: %v", err)
 		os.Exit(-1)
 	}
 
 	cmdPid := cmd.Process.Pid
-	fmt.Printf("%d\n", cmdPid)
+	fmt.Printf("cmdPid: %d\n", cmdPid)
 
 	// 创建子cgroup
 	memoryGroup := path.Join(CgroupMemoryHierarchyMount, "test_memory_limit")

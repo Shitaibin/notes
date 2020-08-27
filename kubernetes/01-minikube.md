@@ -158,7 +158,7 @@ logout
 
 Registry Mirrors对应的是阿里云镜像加速，HTTP proxy也配置上了，如果启动后，发现没有改变，需要删除过去创建的minikube，全部清理一遍。
 
-## 常用minikube命令
+## minikube常用命令
 
 
 

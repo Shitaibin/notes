@@ -1,5 +1,12 @@
 [*Docker目录*](https://github.com/Shitaibin/notes/tree/master/docker#%E7%9B%AE%E5%BD%95)
 
+资源环境：
+
+```
+[~/notes/docker/codes]$ uname -a                                                                                     *[master]
+Linux aliyun 4.4.0-117-generic #141-Ubuntu SMP Tue Mar 13 12:01:47 UTC 2018 i686 i686 i686 GNU/Linux
+```
+
 ## Cgroup
 
 Cgroup 是 Control Group 的缩写，提供对一组进程，及未来子进程的资源限制、控制、统计能力，包括CPU、内存、磁盘、网络。
@@ -183,3 +190,98 @@ centos    3409  2337  0 13:10 pts/0    00:00:00 grep --color=auto --exclude-dir=
 **Cgroup的本质就是通过树形文件系统实现了cgroup hierarchy，cgroup下的目录，都是上层目录的子节点，即子cgroup，会继承上层目录的限制，代表容器的目录，就是针对当前容器的子cgroup，它限定了容器的某一类资源，正是由于这是一颗资源限制树，按不同的资源类别划分，并进行继承，所以一个容器的多种资源限制，分布在多个目录中**。
 
 
+### 利用Go演示Cgroup内存限制
+
+#### 源码
+
+cgroup的演示[源码](./codes/02.1.cgroup.go) ，关于源码中的`/proc/self/exe`看[补充小知识](#补充小知识)。
+
+
+源码运行解读：
+1. 使用`go run`运行程序，或build后运行程序时，程序的名字是`02.1.cgroup`，所以不满足`os.Args[0] == "/proc/self/exe"`会被跳过。
+2. 然后使用`"/proc/self/exe"`新建了子进程，子进程此时叫：`"/proc/self/exe"`
+3. 创建cgroup `test_memory_limit`，然后设置内存限制为100MB
+4. 把子进程加入到cgroup `test_memory_limit`
+5. 等待子进程结束
+6. 子进程干了啥呢？子进程其实还是当前程序，只不过它的名字是`"/proc/self/exe"`，符合最初的if语句，之后它会创建stress子进程，然后运行stress，可以修改`allocMemSize`设置stress所要占用的内存
+
+修改源码，stress命令设置内存占用为99m，然后启动测试程序：
+
+#### 不超越内存限制情况
+
+```
+[~/workspace/notes/docker/codes]$ go run 02.1.cgroup.go
+---------- 1 ------------
+cmdPid: 2533
+---------- 2 ------------
+Current pid: 1
+allocMemSize: 99m
+stress: info: [6] dispatching hogs: 0 cpu, 0 io, 1 vm, 0 hdd
+```
+
+可以看到，子进程`"/proc/self/exe"`运行后取得的pid为 **2533** ，在新的Namespace中，子进程`"/proc/self/exe"`的pid已经变成1，然后利用stress打了99M内存。
+
+使用top查看资源使用情况，stress进程内存RES大约为99M，pid 为 **2539** 。
+
+```
+  PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+ 2539 root      20   0  103940 101680    284 R 93.8  9.9   0:06.09 stress
+```
+
+```
+[/sys/fs/cgroup/memory/test_memory_limit]$ cat memory.limit_in_bytes
+104857600
+[/sys/fs/cgroup/memory/test_memory_limit]$ # 104857600 刚好为100MB
+[/sys/fs/cgroup/memory/test_memory_limit]$ cat memory.usage_in_bytes
+2617344
+[/sys/fs/cgroup/memory/test_memory_limit]$ cat tasks
+2533 <--- /prof/self/exe进程
+2534
+2535
+2536
+2537
+2538
+2539 <--- stress进程
+```
+
+tasks下都是在cgroup `test_memory_limit` 中的进程，这些是Host中真实的进程号，通过`pstree -p`查看进程树，看看这些都是哪些进程：
+
+![Cgroup限制内存的进程树](http://img.lessisbetter.site/2020-08-cgroup.png)
+
+进程树佐证了前面的代码执行流程分析大致是对的，只不过这其中还涉及一些创建子进程的具体手段，比如stress是通过sh命令创建出来的。
+
+#### 内存超过限制被Kill情况
+
+内存超过cgroup限制的内存会怎么样？会OOM吗？
+
+如果将内存提高到占用101MB，大于cgroup中内存的限制100M时就会被Kill。
+
+```
+[~/notes/docker/codes]$ go run 02.1.cgroup.go                                                                        *[master]
+---------- 1 ------------
+cmdPid: 21492
+---------- 2 ------------
+Current pid: 1
+allocMemSize: 101m
+stress: info: [6] dispatching hogs: 0 cpu, 0 io, 1 vm, 0 hdd
+stress: FAIL: [6] (415) <-- worker 7 got signal 9
+stress: WARN: [6] (417) now reaping child worker processes
+stress: FAIL: [6] (421) kill error: No such process
+stress: FAIL: [6] (451) failed run completed in 0s
+2020/08/27 17:38:52 exit status 1
+```
+
+`stress: FAIL: [6] (415) <-- worker 7 got signal 9` 说明收到了信号9，即SIGKILL 。
+
+
+
+### 补充小知识
+
+在演示源码中，使用到`"/proc/self/exe"`，它在Linux是一个特殊的软链接，它指向当前正在运行的程序，比如执行`ll`查看该文件时，它就执行了`/usr/bin/ls`，因为当前的程序是`ls`：
+
+```
+[~]$ ll /proc/self/exe
+lrwxrwxrwx 1 centos centos 0 8月  27 12:44 /proc/self/exe -> /usr/bin/ls
+```
+
+演示代码中的技巧就是通过`"/proc/self/exe"`重新启动一个子进程，只不过进程名称叫`"/proc/self/exe"`而已。如果代码中没有那句if判断，又会执行到创建子进程，最终会导致递归溢出。

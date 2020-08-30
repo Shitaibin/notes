@@ -39,7 +39,7 @@ minikube start --image-mirror-country cn \
 - `--image-mirror-country`: 需要使用的镜像镜像的国家/地区代码。留空以使用全球代码。对于中国大陆用户，请将其设置为
 cn
 - `--docker-env`: 是通过环境变量向docker挂http代理，否则国内可能出现拉不到镜像的问题。挂代理还需要一个必要条件，在主机上使用SS开启代理。挂了代理可能也很难拉到，但不挂代理，几乎拉不下来镜像。
-- `--registry-mirror`: 传递给 Docker 守护进程的注册表镜像。无效：--registry-mirror="https://a90tkz28.mirror.aliyuncs.com"
+- `--registry-mirror`: 传递给 Docker 守护进程的注册表镜像。效果最好的镜像加速器：`--registry-mirror="https://a90tkz28.mirror.aliyuncs.com"`
 - `--image-repository` : 如果不能从gcr.io拉镜像，配置minikube中docker拉镜像的地方
 - `--kubernetes-version`： 指定要部署的k8s版本
 

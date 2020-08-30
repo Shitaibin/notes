@@ -1,5 +1,7 @@
 package main
 
+// 参考《自动动手写Docker》
+
 import (
 	"fmt"
 	"io/ioutil"

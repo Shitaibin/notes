@@ -1,6 +1,12 @@
 package main
 
+// 内存子系统测试
+//
 // 参考《自动动手写Docker》
+//
+// 错误：/proc/self/exe start error: fork/exec /proc/self/exe: operation not permittedexit status 255
+// 处理：Linux内核代码的更新，导致用户态下一些Namespace已无权限，这个链接里提供了几种办法: https://github.com/xianlubird/mydocker/issues/3
+// 但是，不同内核版本方法不同，所以，直接上Root大法吧，这样就能运行了。
 
 import (
 	"fmt"
@@ -30,7 +36,7 @@ func main() {
 		cmd.Stderr = os.Stderr
 
 		if err := cmd.Run(); err != nil {
-			fmt.Printf("stress run error: %v", err)
+			fmt.Printf("stress run error: %v\n", err)
 			os.Exit(-1)
 		}
 	}
@@ -46,7 +52,7 @@ func main() {
 
 	// 启动子进程
 	if err := cmd.Start(); err != nil {
-		fmt.Printf("/proc/self/exe start error: %v", err)
+		fmt.Printf("/proc/self/exe start error: %v\n", err)
 		os.Exit(-1)
 	}
 

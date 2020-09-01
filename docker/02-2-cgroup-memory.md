@@ -3,9 +3,9 @@
 - [Cgroup memory子系统介绍](#cgroup-memory子系统介绍)
 - [利用Docker演示Cgroup内存限制](#利用docker演示cgroup内存限制)
 - [利用Go演示Cgroup内存限制](#利用go演示cgroup内存限制)
-  - [测试源码](#测试源码)
-  - [不超越内存限制情况](#不超越内存限制情况)
-  - [内存超过限制被Kill情况](#内存超过限制被kill情况)
+	- [测试源码](#测试源码)
+	- [不超越内存限制情况](#不超越内存限制情况)
+	- [内存超过限制被Kill情况](#内存超过限制被kill情况)
 - [补充小知识](#补充小知识)
 - [总结](#总结)
 - [参考资料](#参考资料)
@@ -22,7 +22,7 @@ Ubuntu 16.04.4 LTS \n \l
 Linux version 4.4.0-117-generic (buildd@lgw01-amd64-057) (gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.9) ) #141-Ubuntu SMP Tue Mar 13 12:01:47 UTC 2018
 ```
 
-**提醒**：Linux内核版本至少要大于 4.3 这样cgroup的功能才是全的，否则Linux内核版本过低，由于功能不全可能无法运行提供的Demo，目前已知无法运行的内核版本有：`Linux version 3.10.0`。
+**提醒**：由于Linux内核Namespace策略的变更，不同的Linux内核版本可能造成本文的Demo不能运行，Issue https://github.com/xianlubird/mydocker/issues/3 给了一些方案，但仍免不了不同版本上无法运行，如果运行时报 `operation not permitted` ， 切换到 root 用户执行程序。
 
 ## Cgroup memory子系统介绍
 

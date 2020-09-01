@@ -15,7 +15,8 @@ VERSION="18.04.3 LTS (Bionic Beaver)"
 [~]$ cat /proc/cpuinfo | grep "processor" | wc -l
 4
 ```
-## 原理简介
+
+## CPU相关子系统简介
 
 有关CPU的cgroup subsystem有3个：
 - cpu : 用来**限制**cgroup的CPU使用率
@@ -41,7 +42,11 @@ cfs 是Completely Fair Scheduler的缩写，代表完全公平调度，它利用
 
 ![cpu cfs调度](http://img.lessisbetter.site/2020-09-cgroup-cpu-cfs.png)
 
-rt 是RealTime的缩写，它是实时调度，它与cfs调度的区别是cfs不会保证进程的CPU使用率一定要达到设置的比率，而rt会严格保证，让进程的占用率达到这个比率，它包含 `cpu.rt_period_us` 和 `cpu.rt_runtime_us` 2个配置项。
+**注意**： 
+1. `cfs_period_us` 取值范围1000~1000000：1ms ~ 1s，`cfs_quota_us`的最小值为1000，当设置的值不在取值范围时，会报 `write xxx: invalid argument` 的错误。
+2. 只有这2个参数都有意义时，才能把任务写入到 tasks 文件。
+
+rt 是RealTime的缩写，它是实时调度，它与cfs调度的区别是cfs不会保证进程的CPU使用率一定要达到设置的比率，而rt会严格保证，让进程的占用率达到这个比率，适合实时性较强的任务，它包含 `cpu.rt_period_us` 和 `cpu.rt_runtime_us` 2个配置项。
 
 ### cpuacct
 
@@ -251,17 +256,142 @@ cpu user system
 
 分3组实验，利用top、docker stat、cpuacc 3个角度查看CPU使用情况。
 
+测试程序会创建3个goroutine不断的去消耗cpu，它们会占用3个线程，3个线程会分配到3个核上执行，所以CPU使用率不限制时应当达到300%。
+
+程序接受1个入参，代表测试类型：
+- 空或`nolimit`: 无限制
+- `cpu` : 执行cpu限制，利用cfs把cpu使用率控制在5%
+- `cpuset` : 限制只使用核1和核3
+
+
 ### 不限制CPU
 
+1. 启动测试程序，进程id为4805，进入Namespace后进程id变为1，可以看到启动了3个worker协程。
+
+```
+[/home/ubuntu/workspace/notes/docker/codes]$ go run 02.2.cgroup_cpu.go
+---------- 1 ------------
+Test type: No limit
+cmdPid: 4805
+---------- 2 ------------
+Current pid: 1
+worker 2 start
+worker 0 start
+worker 1 start
+```
+
+2. top查看进程的CPU占用率为300%，符合预期。
+
+```
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+ 4805 root      20   0    3376   1004    836 R 300.0  0.0   4:41.09 exe
+```
+
+3. 利用cpuacct查看每个核上的使用时间：
+
+```
+[/sys/fs/cgroup/cpuacct]$ cat test_cpu_limit/cpuacct.usage_all
+cpu user system
+0 8046597390 0
+1 34269979109 0
+2 26597651949 0
+3 33886705168 0
+```
+
+4. 利用cpuset.cpus查看使用的cpu核：
+
+```
+[/sys/fs/cgroup/cpuset]$ cat test_cpuset_limit/cpuset.cpus
+0-3
+```
 
 
 ### 使用cpu限制CPU使用率
 
+1. 启动测试程序：
+
+```
+[/home/ubuntu/workspace/notes/docker/codes]$ go run 02.2.cgroup_cpu.go cpu
+---------- 1 ------------
+Test type: Cpu limit
+cmdPid: 4937
+---------- 2 ------------
+Current pid: 1
+worker 2 start
+worker 1 start
+worker 0 start
+```
+
+2. top查看进程的CPU占用率为5.0%，符合预期。
+
+```
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+ 4937 root      20   0    3376   1004    836 R   5.3  0.0   0:08.40 exe
+```
+
+3. 利用cpuacct查看每个核上的使用时间，由于没有限制使用的cpu核，所以每个核上都还有运行时间
+
+```
+[/sys/fs/cgroup/cpuacct]$ cat test_cpu_limit/cpuacct.usage_all
+cpu user system
+0 2036903414 0
+1 44170 0
+2 4428266075 0
+3 4356927661 0
+```
+
+4. 利用cpuset.cpus查看使用的cpu核
+
+```
+[/sys/fs/cgroup/cpuset]$ cat test_cpuset_limit/cpuset.cpus
+0-3
+```
+
 ### 使用cpuset限制CPU占用的核
+
+
+1. 启动测试程序，这次与前面的不同，看到只起来了2个worker协程在运行，因为机器上的Go版本是go1.10，还不支持抢占，当协程为for循环时，2个协程都持续运行，不让出cpu，只有2个核时，第3个协程无法运行。
+
+```
+[/home/ubuntu/workspace/notes/docker/codes]$ go run 02.2.cgroup_cpu.go cpuset
+---------- 1 ------------
+Test type: Cpuset limit
+cmdPid: 5063
+---------- 2 ------------
+Current pid: 1
+worker 2 start
+worker 0 start
+```
+
+2. top查看进程的CPU占用率为200%，符合只使用2个核的预期。
+
+```
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+ 5063 root      20   0    3376   1004    836 R 199.7  0.0   4:21.49 exe
+```
+
+3. 利用cpuacct查看每个核上的使用时间，只有核1和3上有时间统计，说明只使用了核1和3
+
+```
+[/sys/fs/cgroup/cpuacct]$ cat test_cpu_limit/cpuacct.usage_all
+cpu user system
+0 0 0
+1 24172994458 0
+2 0 0
+3 24213057511 0
+```
+
+4. 利用cpuset.cpus查看使用的cpu核
+
+```
+[/sys/fs/cgroup/cpuset]$ cat test_cpuset_limit/cpuset.cpus
+1,3
+```
 
 ## 资料
 
-未看资料：
-超强介绍：https://juejin.im/entry/6844903622698860551
 
-googlesource上介绍了cgroup中各subsystem的各指标的含义：https://kernel.googlesource.com/pub/scm/linux/kernel/git/glommer/memcg/+/cpu_stat/Documentation/cgroups
+1. googlesource上介绍了cgroup中各subsystem的各指标的含义：https://kernel.googlesource.com/pub/scm/linux/kernel/git/glommer/memcg/+/cpu_stat/Documentation/cgroups
+2. 解决写 cpu.cfs_quota_us `invalid argument`问题：https://my.oschina.net/xiaominmin/blog/3068364
+3. 解决写 cpuset.tasks `No space` 问题： https://blog.csdn.net/xftony/article/details/80536562
+4. cgroup使用踩坑：https://www.cnblogs.com/raymondshiquan/articles/2727037.html

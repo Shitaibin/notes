@@ -29,21 +29,31 @@ func main() {
 	// 创建子cpu cgroup和cpuset group
 	cpuGroup := path.Join("/sys/fs/cgroup/cpu", "test_cpu_limit")
 	cpusetGroup := path.Join("/sys/fs/cgroup/cpuset", "test_cpuset_limit")
-	defer func() {
-		fmt.Println("Exit main")
-		if err := os.RemoveAll(cpuGroup); err != nil {
-			fmt.Printf("Remove cpuGroup path error: %v\n", err)
-		}
-		if err := os.RemoveAll(cpusetGroup); err != nil {
-			fmt.Printf("Remove cpusetGroup path error: %v\n", err)
-		}
-	}()
-
+	// 上传上次创建的目录
+	if err := os.RemoveAll(cpuGroup); err != nil {
+		fmt.Printf("Remove cpuGroup path error: %v\n", err)
+	}
+	if err := os.RemoveAll(cpusetGroup); err != nil {
+		fmt.Printf("Remove cpusetGroup path error: %v\n", err)
+	}
 	if err := os.Mkdir(cpuGroup, 0755); err != nil {
 		fmt.Printf("Mkdir cpuGroup error: %v\n", err)
 	}
 	if err := os.Mkdir(cpusetGroup, 0755); err != nil {
-		fmt.Printf("Mkdir cpuGroup error: %v\n", err)
+		fmt.Printf("Mkdir cpusetGroup error: %v\n", err)
+	}
+
+	// 默认设置，无默认设置时，把任务添加到tasks会失败：no space left on device
+	// https://blog.csdn.net/xftony/article/details/80536562
+	// 0代表当前机器
+	if err := ioutil.WriteFile(path.Join(cpusetGroup, "cpuset.mems"), []byte("0"), 0644); err != nil {
+		fmt.Printf("Write cpuset.cpus error: %v\n", err)
+		return
+	}
+	// 0-3代表使用核0~3，4个核
+	if err := ioutil.WriteFile(path.Join(cpusetGroup, "cpuset.cpus"), []byte("0-3"), 0644); err != nil {
+		fmt.Printf("Write cpuset.cpus error: %v\n", err)
+		return
 	}
 
 	fmt.Printf("Test type: ")
@@ -53,7 +63,7 @@ func main() {
 	} else if os.Args[1] == "cpu" {
 		fmt.Println("Cpu limit")
 		// 限制cpu使用时间，使用cfs类型
-		if err := ioutil.WriteFile(path.Join(cpuGroup, "cpu.cfs_quota_us"), []byte("500"), 0755); err != nil {
+		if err := ioutil.WriteFile(path.Join(cpuGroup, "cpu.cfs_quota_us"), []byte("5000"), 0755); err != nil {
 			fmt.Printf("Write cpu.cfs_quota_us error: %v\n", err)
 			return
 		}

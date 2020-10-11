@@ -6,6 +6,7 @@
 - [目录](#目录)
 - [Docker架构](#docker架构)
 - [启动一个容器](#启动一个容器)
+  - [参考资料](#参考资料)
 
 ## Docker架构
 
@@ -49,18 +50,19 @@ Docker包含的多个组件：
 组件分3类：
 1. docker
    - docker: docker客户端
-   - dockerd: docker服务端，守护进程
+   - dockerd: docker服务端，守护进程，即docker engine，dockerd是它可执行文件的缩写
    - docker-init: 容器内的进程为1号进程，当容器启动的进程无回收能力时，可以使用`--init`参数，让docker-init作为1号进程
    - docker-proxy: 负责容器的网络代理，当设置了端口映射`-p 8080:80`，主机80端口的请求，都会转发到容器的80端口，是通过iptabels实现的转发
 2. [containerd](https://containerd.io/)，它是CNCF已毕业的项目，：
    - containerd: 负责容器管理，镜像拉取、存储和网络资源
-   - containerd-shim: 利用shim实现containerd和真正容器进程的解耦，这样containerd进程重启，不会影响容器进程。每个容器都有一个shim进程作为父进程，shim进程的声明周期和容器的声明周期相同。containerd-shim可以调用任何符合OCI的运行时，不仅仅是runc，还可以调用kata-runtime。通过这幅架构图，你更能理解containerd和shim的关系，可以把shim作为一个和具体容器运行时解耦的插件集合，它负责和各种具体的容器运行时交互。
-   - ![containerd架构图](https://containerd.io/img/architecture.png)
+   - containerd-shim: 利用shim实现containerd和真正容器进程的解耦。容器进程需要一个父进程来做诸如收集状态, 维持 stdin 等 fd 打开等工作. 而假如这个父进程就是 containerd, 那每次 containerd 挂掉或升级, 整个宿主机上所有的容器都得退出了。每个容器都有一个shim进程作为父进程，shim进程的声明周期和容器的声明周期相同。containerd-shim可以调用任何符合OCI的运行时，不仅仅是runc，还可以调用kata-runtime。通过这幅架构图，你更能理解containerd和shim的关系，可以把shim作为一个和具体容器运行时解耦的插件集合，它负责和各种具体的容器运行时交互。
+   - ![containerd架构图](https://containerd.io/img/architecture.png)在Client那一层可以看到，kubelet通过CRI，dokcer、buildKit、ctr通过containerd client调用containerd。
    - ctr: 实际是containerd-ctr，是containerd的客户端，没有docker的时候，充当docker的部分功能
 
 3. runc
-   - runc: 是一个命令行工具，可以启动和运行1个容器
+   - runc: 是一个命令行工具，可以启动和运行1个容器，是 OCI (Open Container Initiative，开放容器标准)的标准实现。
 
+> runc和containerd都是由最初的docker拆解出来的组件，使得开发者不需要通过docker engine也可以创建容器。runc是低层级的容器运行时，因为它只包含启动和运行容器，而containerd是更高层级的容器运行时，因为它还包含了镜像等其他功能。
 
 
 ## 启动一个容器
@@ -85,3 +87,7 @@ systemd
 ```
 
 dockerd启动时启动了containerd，containerd创建了containerd-shim，然后在其中创建了真正的进程`sleep 3600`。
+
+### 参考资料
+
+- [kubelet之cri演变史](https://zhuanlan.zhihu.com/p/87602649)，介绍了docker的演变，同时也就能清楚为何现在containerd和docker(engine)能平起平坐了，k8s这是要把docker(engine)直接踢出去了。

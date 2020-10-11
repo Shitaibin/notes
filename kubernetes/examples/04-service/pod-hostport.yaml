@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp-hostport
+  labels:
+    app: webapp
+spec:
+  containers:
+    - name: webapp
+      image: tomcat
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      ports:
+        - containerPort: 8080
+          hostPort: 8081

@@ -1,0 +1,13 @@
+# 通过nodePort把service的端口映射到host，通过host的ip和端口，使得集群外部可以访问service
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: webapp
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30001

@@ -15,6 +15,7 @@ spec:
       image: quay.io/openshiftlabs/simpleservice:0.5.0 #创建容器所使用的镜像
       ports:
         - containerPort: 9876 #应用监听的端口
+      imagePullPolicy: IfNotPresent
     - name: shell #容器的名称
       image: centos:7 #创建容器所使用的镜像
       command: #容器启动命令

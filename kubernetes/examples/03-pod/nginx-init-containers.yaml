@@ -31,7 +31,6 @@ spec:
         - mountPath: /usr/share/nginx/html
           name: workdir
       imagePullPolicy: IfNotPresent
-  # PV
   volumes:
     - name: workdir
       emptyDir: {}

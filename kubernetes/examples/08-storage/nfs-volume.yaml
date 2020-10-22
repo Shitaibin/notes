@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-nfs
+  labels:
+    name: busybox-nfs
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.0
+      command:
+        - sh
+        - -c
+        - "while true; do date > /mnt/index.html; hostname >> /mnt/index.html; sleep $(($RANDOM % 5 + 5)); done"
+      # 把volume挂载到mnt
+      volumeMounts:
+        - mountPath: /mnt
+          name: nfs-volume
+  volumes:
+    # 前提先本机部署NFS服务器
+    - name: nfs-volume
+      nfs:
+        path: /nfs
+        server: 0.0.0.0

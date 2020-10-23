@@ -1,24 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: nginx
+  labels:
+    app: nginx
 spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   selector:
     matchLabels:
       app: nginx
-  replicas: 2
   template:
     metadata:
       labels:
         app: nginx
     spec:
       containers:
-        - name: nginx
-          image: nginx:1.7.9
-          resources:
-            limits:
-              memory: "128Mi"
-              cpu: "500m"
+        - image: nginx:1.9.1
+          name: nginx
           ports:
+            - containerPort: 5000
+              name: prob
             - containerPort: 80
-          imagePullPolicy: IfNotPresent
+              name: http
+          volumeMounts:
+            - mountPath: /user/share/nginx/html
+              name: data
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "55M"
+            limits:
+              cpu: "20m"
+              memory: "100M"
+      restartPolicy: Always
+      volumes:
+        - name: data
+          emptyDir: {}

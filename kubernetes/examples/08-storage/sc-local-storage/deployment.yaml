@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox
+spec:
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+        - name: busybox
+          image: busybox
+          volumeMounts:
+            - name: local-vol
+              mountPath: /tmp/local
+      volumes:
+        - name: local-vol
+          persistentVolumeClaim:
+            claimName: local-pvc

@@ -1,0 +1,9 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-sc
+  annotations:
+    # 这个注解标记sc为默认的，如果pvc没有指定sc，pvc就使用默认sc
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/no-provisioner
+# volumeBindingMode: WaitForFirstConsumer

@@ -1,0 +1,14 @@
+namePrefix: dev-
+commonLabels:
+        app: dev-nginx
+        variant: dev
+        group: develop
+
+bases:
+        - ../../base
+images:
+        - name: nginx
+          newTag: 1.19.0
+replicas:
+        - name: nginx
+          count: 5

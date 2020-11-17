@@ -4,14 +4,15 @@
 
 
 ## 目录
-- [目录](#%E7%9B%AE%E5%BD%95)
-- [Service简介](#Service%E7%AE%80%E4%BB%8B)
-  - [ClusterIP：对集群内提供访问](#ClusterIP%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%86%85%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
-  - [NodePort：对集群外提供访问](#NodePort%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%A4%96%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
-  - [LoadBalencer：对集群外提供访问](#LoadBalencer%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%A4%96%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
-  - [Ingress：对集群外提供访问](#Ingress%E5%AF%B9%E9%9B%86%E7%BE%A4%E5%A4%96%E6%8F%90%E4%BE%9B%E8%AE%BF%E9%97%AE)
-  - [Service架构](#Service%E6%9E%B6%E6%9E%84)
-  - [Port & NodePort & TargetPort](#Port--NodePort--TargetPort)
+- [目录](#目录)
+- [Service简介](#service简介)
+  - [ClusterIP：对集群内提供访问](#clusterip对集群内提供访问)
+  - [NodePort：对集群外提供访问](#nodeport对集群外提供访问)
+  - [LoadBalencer：对集群外提供访问](#loadbalencer对集群外提供访问)
+  - [Ingress：对集群外提供访问](#ingress对集群外提供访问)
+  - [Service架构](#service架构)
+  - [Port & NodePort & TargetPort](#port--nodeport--targetport)
+  - [Headless Service](#headless-service)
 
 
 ## Service简介
@@ -90,5 +91,60 @@ Port是service的端口。
 NodePort是Node的端口。
 
 TargetPort是Pod的端口。
+
+[↑top](#目录)
+
+### Headless Service
+
+Service类型为ClusterIP，但无需分配IP地址给service。
+
+headless service无法对请求路由，它只辅助提供生成从service名称到pod ip的映射，即域名记录。
+
+部署[headless-svc.yaml](./examples/04-service/headless/headless-svr.yaml)后:
+
+```
+$ kubectl get svc,pod
+NAME                             TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/headless-demo            ClusterIP      None             <none>        1234/TCP         7s
+
+NAME                                   READY   STATUS        RESTARTS   AGE
+pod/headless-demo-645dff5c6c-5qgsq     1/1     Running       0          7s
+pod/headless-demo-645dff5c6c-clwj5     1/1     Running       0          7s
+pod/headless-demo-645dff5c6c-w4628     1/1     Running       0          7s
+```
+
+可以看到service的CLUSTER-IP字段为None，service的描述信息可以看到已经关联的Endpoints，已经形成了service名字到Endpoints的映射。
+
+```
+$ kubectl describe svc headless-demo
+Name:              headless-demo
+Namespace:         default
+Labels:            <none>
+Annotations:       <none>
+Selector:          name=headless-demo
+Type:              ClusterIP
+IP:                None
+Port:              <unset>  1234/TCP
+TargetPort:        1234/TCP
+Endpoints:         10.32.0.14:1234,10.32.0.15:1234,10.32.0.16:1234
+Session Affinity:  None
+Events:            <none>
+```
+
+使用nslookup验证，确实能通过域名查询到3个对于的pod IP地址：
+
+```
+$ kubectl exec sleep -- nslookup headless-demo
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+Name:	headless-demo.default.svc.cluster.local
+Address: 10.32.0.15
+Name:	headless-demo.default.svc.cluster.local
+Address: 10.32.0.16
+Name:	headless-demo.default.svc.cluster.local
+Address: 10.32.0.14
+```
+
 
 [↑top](#目录)

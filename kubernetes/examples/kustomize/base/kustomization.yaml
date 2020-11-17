@@ -1,0 +1,5 @@
+commonLabels:
+        app: kustomize-nginx
+
+resources:
+- nginx-deployment.yaml

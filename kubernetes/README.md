@@ -19,4 +19,6 @@ Kubernetes
 - [应用编排与管理之 DaemonSet](./07-daemonset.md)
 - [应用配置管理之 InitContainer](./08-init-container.md)
 - [应用配置管理之 Service](./14-service.md)
+- [应用管理之 Endpoints](./15-endpoints.md)
 - [存储之 PV、PVC、SC](./09-pv-pvc.md)
+

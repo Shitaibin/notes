@@ -1,0 +1,11 @@
+namePrefix: testing-
+commonLabels:
+        app: testing-nginx
+        variant: testing
+        group: test
+
+bases:
+        - ../../base
+
+patchesStrategicMerge:
+        - nginx-deployment.yaml

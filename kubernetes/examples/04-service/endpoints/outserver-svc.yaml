@@ -1,0 +1,22 @@
+kind: "Service"
+apiVersion: "v1"
+metadata:
+  name: "external-web"
+spec:
+  ports:
+    - name: "nginx"
+      protocol: "TCP"
+      port: 80
+      targetPort: 80
+---
+kind: "Endpoints"
+apiVersion: "v1"
+metadata:
+  # 与service同名
+  name: "external-web"
+subsets:
+  - addresses:
+      - ip: "10.10.50.53" # 外部nginx ip地址
+    ports:
+      - port: 80
+        name: "nginx"
